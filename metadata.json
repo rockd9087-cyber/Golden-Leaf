@@ -1,0 +1,6 @@
+{
+  "name": "Golden Leaf — Digital Herbarium & Botanical Field Archive",
+  "description": "Interactive botanical herbarium archive featuring 10 geotagged plant specimens collected in Indore, Madhya Pradesh, with 3-second Golden Leaf team intro, leaf cursor physics, 3D Earth biogeography globe, and taxonomic sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

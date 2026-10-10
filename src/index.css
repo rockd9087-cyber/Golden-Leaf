@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-parchment: #F6F4EC;
+    --bg-sheet: #FCFBF7;
+    --bg-sage-soft: #EBF0E8;
+    --text-forest: #162319;
+    --text-moss: #465749;
+    --border-botanical: #D6DFD0;
+    --accent-emerald: #1B432C;
+    --accent-gold: #B6862C;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--bg-parchment);
+    color: var(--text-forest);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-serif-display {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .font-mono-tabular {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes swayCanopy {
+  0%, 100% {
+    transform: rotate(-1.2deg) scale(1.01);
+  }
+  50% {
+    transform: rotate(1.2deg) scale(1.02);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-sway-canopy {
+  animation: swayCanopy 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-sway-canopy {
+    animation: none !important;
+  }
+}
