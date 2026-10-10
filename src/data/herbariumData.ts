@@ -1,13 +1,13 @@
-import imgTradescantia from '../assets/images/specimen_tradescantia_zebrina_1791645654802.jpg';
+import imgTradescantia from '../assets/images/regenerated_image_1791652222625.jpg';
 import imgCissus from '../assets/images/specimen_cissus_quadrangularis_1791645668185.jpg';
 import imgIndianAlmond from '../assets/images/photo_indian_almond_1791647910384.jpg';
 import imgBridalBouquet from '../assets/images/photo_bridal_bouquet_1791647922991.jpg';
 import imgThuja from '../assets/images/photo_thuja_1791647934802.jpg';
 import imgBuddhistPine from '../assets/images/photo_buddhist_pine_1791647945499.jpg';
 import imgSilverWattle from '../assets/images/photo_silver_wattle_1791647955949.jpg';
-import imgHalfFlower from '../assets/images/photo_half_flower_1791647965716.jpg';
-import imgRoseOfSharon from '../assets/images/photo_rose_of_sharon_1791647975643.jpg';
-import imgSpiderPlant from '../assets/images/photo_spider_plant_1791647986264.jpg';
+import imgHalfFlower from '../assets/images/regenerated_image_1791652259328.png';
+import imgRoseOfSharon from '../assets/images/regenerated_image_1791652262297.png';
+import imgSpiderPlant from '../assets/images/regenerated_image_1791652265666.png';
 import imgTeamDefault from '../assets/images/team_golden_leaf_expedition_1791645644802.jpg';
 
 export interface GeotagData {

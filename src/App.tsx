@@ -20,14 +20,12 @@ import { InteractiveForestAndCursor } from './components/InteractiveForestAndCur
 import { HerbariumSpecimenSheet } from './components/HerbariumSpecimenSheet';
 import { MeetTheTeamSection } from './components/MeetTheTeamSection';
 import { MiniSpeciesGlobe } from './components/MiniSpeciesGlobe';
-
-const STORAGE_KEY_IMAGES = 'golden_leaf_herbarium_custom_images_v2';
-const STORAGE_KEY_TEAM = 'golden_leaf_herbarium_team_photo_v2';
+import { loadAllPhotosFromDB, savePhotoToDB } from './utils/imageStorage';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState<boolean>(true);
   const [leafCursorEnabled, setLeafCursorEnabled] = useState<boolean>(true);
-  const [showGeotagOverlays, setShowGeotagOverlays] = useState<boolean>(true);
+  const [showGeotagOverlays, setShowGeotagOverlays] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedOrder, setSelectedOrder] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -42,78 +40,104 @@ export default function App() {
   const batchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    try {
-      const savedImages = localStorage.getItem(STORAGE_KEY_IMAGES);
-      if (savedImages) {
-        setCustomImages(JSON.parse(savedImages));
+    loadAllPhotosFromDB().then((stored) => {
+      const specimenMap: Record<string, string> = {};
+      Object.entries(stored).forEach(([key, val]) => {
+        if (key === '__team_photo__') {
+          setTeamPhotoUrl(val);
+        } else if (key === '__diagram_photo__') {
+          setDiagramPhotoUrl(val);
+        } else {
+          specimenMap[key] = val;
+        }
+      });
+      if (Object.keys(specimenMap).length > 0) {
+        setCustomImages(specimenMap);
       }
-      const savedTeam = localStorage.getItem(STORAGE_KEY_TEAM);
-      if (savedTeam) {
-        setTeamPhotoUrl(savedTeam);
-      }
-    } catch {
-      // Ignore storage quota or parse errors
-    }
+    });
   }, []);
 
   const handleUploadCustomImage = (specimenId: string, dataUrl: string) => {
-    setCustomImages((prev) => {
-      const next = { ...prev, [specimenId]: dataUrl };
-      try {
-        localStorage.setItem(STORAGE_KEY_IMAGES, JSON.stringify(next));
-      } catch {
-        // Ignore quota limits
-      }
-      return next;
-    });
+    setCustomImages((prev) => ({ ...prev, [specimenId]: dataUrl }));
+    savePhotoToDB(specimenId, dataUrl);
   };
 
   const handleUploadTeamPhoto = (dataUrl: string) => {
     setTeamPhotoUrl(dataUrl);
-    try {
-      localStorage.setItem(STORAGE_KEY_TEAM, dataUrl);
-    } catch {
-      // Ignore quota limits
-    }
+    savePhotoToDB('__team_photo__', dataUrl);
+  };
+
+  const handleUploadDiagramPhoto = (dataUrl: string) => {
+    setDiagramPhotoUrl(dataUrl);
+    savePhotoToDB('__diagram_photo__', dataUrl);
   };
 
   const processFiles = (files: FileList | File[]) => {
     let matchedCount = 0;
+    const unmatchedFiles: File[] = [];
+
     Array.from(files).forEach((file) => {
       const lower = file.name.toLowerCase();
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result !== 'string') return;
-        const dataUrl = reader.result;
-
-        if (lower.includes('team') && !lower.includes('desci')) {
-          handleUploadTeamPhoto(dataUrl);
-          matchedCount++;
-        } else if (lower.includes('desci') || lower.includes('diagram')) {
-          setDiagramPhotoUrl(dataUrl);
+      if (lower.includes('team') && !lower.includes('desci')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            handleUploadTeamPhoto(reader.result);
+          }
+        };
+        reader.readAsDataURL(file);
+        matchedCount++;
+      } else if (lower.includes('desci') || lower.includes('diagram')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            handleUploadDiagramPhoto(reader.result);
+          }
+        };
+        reader.readAsDataURL(file);
+        matchedCount++;
+      } else {
+        const matchedSpecimen = HERBARIUM_SPECIMENS.find((sp) => {
+          const targetBase = sp.fileName
+            .toLowerCase()
+            .replace(/\.(jpg|jpeg|png|webp)$/, '');
+          return (
+            lower.includes(targetBase) ||
+            lower.includes(sp.commonName.toLowerCase()) ||
+            lower.includes(sp.taxonomy.genus.toLowerCase())
+          );
+        });
+        if (matchedSpecimen) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === 'string') {
+              handleUploadCustomImage(matchedSpecimen.id, reader.result);
+            }
+          };
+          reader.readAsDataURL(file);
           matchedCount++;
         } else {
-          const matchedSpecimen = HERBARIUM_SPECIMENS.find((sp) => {
-            const targetBase = sp.fileName
-              .toLowerCase()
-              .replace(/\.(jpg|jpeg|png|webp)$/, '');
-            return (
-              lower.includes(targetBase) ||
-              lower.includes(sp.commonName.toLowerCase()) ||
-              lower.includes(sp.taxonomy.genus.toLowerCase())
-            );
-          });
-          if (matchedSpecimen) {
-            handleUploadCustomImage(matchedSpecimen.id, dataUrl);
-            matchedCount++;
-          }
+          unmatchedFiles.push(file);
         }
-        setBatchMatchMessage(
-          `Loaded ${matchedCount} photo(s) into the herbarium archive.`
-        );
+      }
+    });
+
+    // If user selected files that didn't match by name, assign sequentially
+    unmatchedFiles.forEach((file, idx) => {
+      const targetSpecimen = HERBARIUM_SPECIMENS[idx % HERBARIUM_SPECIMENS.length];
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          handleUploadCustomImage(targetSpecimen.id, reader.result);
+        }
       };
       reader.readAsDataURL(file);
+      matchedCount++;
     });
+
+    setBatchMatchMessage(
+      `Loaded & saved ${matchedCount} photo(s) into the herbarium archive.`
+    );
   };
 
   const handleBatchUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,7 +214,7 @@ export default function App() {
           href="#top"
           className="text-xl sm:text-2xl font-serif-display font-bold tracking-tight text-[#162319] whitespace-nowrap shrink-0"
         >
-          Golden Leaf Herbarium
+          Golden Leaf
         </a>
 
         {/* Zone 2: 4 Single-Line Navigation Links */}
@@ -640,7 +664,7 @@ export default function App() {
           teamPhotoUrl={teamPhotoUrl}
           onUploadTeamPhoto={handleUploadTeamPhoto}
           diagramPhotoUrl={diagramPhotoUrl}
-          onUploadDiagramPhoto={(url) => setDiagramPhotoUrl(url)}
+          onUploadDiagramPhoto={handleUploadDiagramPhoto}
         />
 
         {/* Complete Taxonomic & Geotag Master Index Table */}
@@ -722,7 +746,7 @@ export default function App() {
         <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <span className="font-serif-display font-bold text-sm text-[#162319]">
-              Golden Leaf Herbarium Project
+              Golden Leaf
             </span>
             <span> · </span>
             <span>

@@ -56,7 +56,7 @@ export const MeetTheTeamSection: React.FC<MeetTheTeamSectionProps> = ({
               className="text-3xl sm:text-4xl lg:text-[42px] font-serif-display font-semibold text-[#162319] leading-tight"
               style={{ textWrap: 'balance' }}
             >
-              Meet the Golden Leaf Herbarium Team
+              Meet the Golden Leaf Team
             </h2>
             <p className="text-sm sm:text-base text-[#465749] leading-relaxed">
               Guided by the field motto{' '}
@@ -66,7 +66,7 @@ export const MeetTheTeamSection: React.FC<MeetTheTeamSectionProps> = ({
               , our six-member botanical team conducted on-site field collection across
               Kushwaha Nagar and Banganga in Indore, Madhya Pradesh (452015). From live
               GPS specimen reconnaissance and pressing preservation to taxonomic
-              verification and sheet decoration, every member contributed a specialized
+              documentation and sheet decoration, every member contributed a specialized
               discipline to this digital and physical herbarium archive.
             </p>
           </div>
@@ -116,7 +116,7 @@ export const MeetTheTeamSection: React.FC<MeetTheTeamSectionProps> = ({
           </div>
         </div>
 
-        {/* Interactive Herbarium Team Callout Diagram (Inspired by team desciotion.jpeg) */}
+        {/* Interactive Herbarium Team Callout Diagram */}
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* LEFT COLUMN: 6 Leaf-Shaped Member Name Callouts */}
           <div
@@ -250,7 +250,7 @@ export const MeetTheTeamSection: React.FC<MeetTheTeamSectionProps> = ({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: 6 Leaf-Shaped Role Callouts (Matching team desciotion.jpeg) */}
+          {/* RIGHT COLUMN: 6 Leaf-Shaped Role Callouts */}
           <div className="lg:col-span-3 flex flex-col gap-3 order-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-[#465749] pb-1 border-b border-[#D6DFD0] flex items-center justify-between">
               <span>Project Role</span>
